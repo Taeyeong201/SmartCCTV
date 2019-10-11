@@ -43,7 +43,8 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
                     android:ems="10"
-                    android:id="@+id/et_userID" android:layout_marginBottom="15sp" android:hint="ID"/>
+                    android:id="@+id/et_userID" android:layout_marginBottom="15sp" android:hint="ID"
+                    android:text="user1"/>
             <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
