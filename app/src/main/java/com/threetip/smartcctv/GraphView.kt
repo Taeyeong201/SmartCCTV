@@ -1,11 +1,10 @@
-package com.threetip.myapplication
+package com.threetip.smartcctv
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import kotlinx.android.synthetic.main.graph_view.*
-import kotlinx.android.synthetic.main.live_stream_view.*
 import kotlinx.android.synthetic.main.live_stream_view.wv_live
 
 class GraphView : AppCompatActivity(){
@@ -15,14 +14,14 @@ class GraphView : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.graph_view)
 
-        val ws_setting = wv_live.settings
-        ws_setting.javaScriptEnabled = true
-        ws_setting.loadWithOverviewMode = true
-        ws_setting.useWideViewPort = true
+        val wsSetting = wv_live.settings
+        wsSetting.javaScriptEnabled = true
+        wsSetting.loadWithOverviewMode = true
+        wsSetting.useWideViewPort = true
         wv_live.webViewClient = WebViewClient()
-        ws_setting.builtInZoomControls = true
-        ws_setting.setSupportZoom(true)
-        ws_setting.cacheMode = WebSettings.LOAD_NO_CACHE
+        wsSetting.builtInZoomControls = true
+        wsSetting.setSupportZoom(true)
+        wsSetting.cacheMode = WebSettings.LOAD_NO_CACHE
 
         wv_live.loadUrl("http://221.155.250.34:8082/controller/Customer/chartand?data=month")
 

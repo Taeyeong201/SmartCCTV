@@ -1,20 +1,12 @@
-package com.threetip.myapplication
+package com.threetip.smartcctv
 
-import android.Manifest
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
-import android.content.pm.PackageManager
-import android.Manifest.permission
-import android.Manifest.permission.WRITE_CALENDAR
-import android.content.DialogInterface
-import android.opengl.Visibility
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.Toast
-import kotlinx.android.synthetic.main.menu_view.*
 
 
 class MainActivity : AppCompatActivity() {

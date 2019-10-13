@@ -1,4 +1,4 @@
-package com.threetip.myapplication
+package com.threetip.smartcctv
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity

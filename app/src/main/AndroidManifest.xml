@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.threetip.myapplication">
+          xmlns:tools="http://schemas.android.com/tools" package="com.threetip.smartcctv">
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -11,18 +11,18 @@
             android:supportsRtl="true"
             android:usesCleartextTraffic="true"
             android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.threetip.smartcctv.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MainMenu"/>
-        <activity android:name=".LiveStreamView"/>
-        <activity android:name=".SignUpView"/>
-        <activity android:name=".GraphView"/>
-        <activity android:name=".DetectingView"/>
+        <activity android:name="com.threetip.smartcctv.MainMenu"/>
+        <activity android:name="com.threetip.smartcctv.LiveStreamView"/>
+        <activity android:name="com.threetip.smartcctv.SignUpView"/>
+        <activity android:name="com.threetip.smartcctv.GraphView"/>
+        <activity android:name="com.threetip.smartcctv.DetectingView"/>
 
     </application>
 

@@ -1,14 +1,10 @@
-package com.threetip.myapplication.controller
+package com.threetip.smartcctv.controller
 
-import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.support.v7.app.AlertDialog
-import android.view.View
-import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.ProgressBar
 
 import java.io.IOException
 import java.net.HttpURLConnection
