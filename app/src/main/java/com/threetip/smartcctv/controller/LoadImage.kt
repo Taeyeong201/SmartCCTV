@@ -1,5 +1,6 @@
 package com.threetip.smartcctv.controller
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
@@ -10,7 +11,12 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-class LoadImage(private val imgPath: String, private val progressDialog: AlertDialog, val imageView : ImageView) : AsyncTask<Void, Void, Bitmap>() {
+class LoadImage
+(private val imgPath: String, private val progressDialog: AlertDialog, private val imageView : ImageView)
+    // 이 코드는 메모리릭이 생길 수 있는 코딩
+    // https://dwenn.tistory.com/48 해결방안
+    : AsyncTask<Void, Void, Bitmap>() {
+
     override fun doInBackground(vararg params: Void?): Bitmap? {
         return getBitmap()
     }
@@ -42,7 +48,6 @@ class LoadImage(private val imgPath: String, private val progressDialog: AlertDi
                 }
             }
         }
-
         imgThread.start()
         try {
             imgThread.join()

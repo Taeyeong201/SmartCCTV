@@ -1,4 +1,4 @@
-package com.threetip.smartcctv.fragment
+package com.threetip.smartcctv.subframe
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
