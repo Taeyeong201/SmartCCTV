@@ -15,6 +15,7 @@ import com.threetip.smartcctv.controller.DetectViewHandler
 import com.threetip.smartcctv.controller.ReadDetectImage
 import com.threetip.smartcctv.controller.litener.DetectViewListener
 import com.threetip.smartcctv.dto.DetectImage
+import com.threetip.smartcctv.dto.HandleValue
 import com.threetip.smartcctv.subframe.HeatMapFrame
 import com.threetip.smartcctv.subframe.MainFrame
 import kotlinx.android.synthetic.main.detect_activity.*
@@ -29,24 +30,33 @@ class DetectingView : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.detect_activity)
-        clearApplicationData(this)
+        //cache data 삭제
+//        clearApplicationData(this)
         pager.offscreenPageLimit = 3
         val pagerAdapter = FlagPageAdapter(supportFragmentManager)
 
         val progressBarMaker = ProgressBarMaker(this, "Loading")
         val progressDialog = progressBarMaker.getProgressDialog()
-        val progressDialog1 = progressBarMaker.getProgressDialog()
 
         detectHandler = DetectViewHandler(object : DetectViewListener {
             override fun loadingFinish() {
+
+
                 pagerAdapter.notifyDataSetChanged()
             }
         })
 
-        ReadDetectImage("test", this, progressDialog).execute()
+        // (Data 받을 URL, context, progressBar)
+        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
+                this, progressDialog, HandleValue.DETECT_MAIN_FRAME.ordinal).execute()
+        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
+                this, progressDialog, HandleValue.DETECT_CROP_FRAME.ordinal).execute()
+        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
+                this, progressDialog, HandleValue.DETECT_HEATMAP_FRAME.ordinal).execute()
+
 
         //어뎁터에 Fragment 추가
-        pagerAdapter.addItem(MainFrame(progressDialog1))
+        pagerAdapter.addItem(MainFrame())
         pagerAdapter.addItem(HeatMapFrame())
         pagerAdapter.addItem(DetectedFrame())
 
@@ -60,14 +70,17 @@ class DetectingView : AppCompatActivity() {
         tab_layout.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(pager))
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tab_layout))
 
+
     }
 
 
     // java static
     companion object {
-        val detectImages = ArrayList<DetectImage>()
+        val detectMainImages = ArrayList<DetectImage>()
+        val detectHeatMapImages = ArrayList<DetectImage>()
+        val detectCropImages = ArrayList<DetectImage>()
         lateinit var detectHandler:DetectViewHandler
-        fun getTestJSONArray(): JSONArray {
+        fun getMainJSONArray(): JSONArray {
             return JSONArray("[\n" +
                     " {\n" +
                     "   \"S_no\": 16434,\n" +
@@ -419,9 +432,442 @@ class DetectingView : AppCompatActivity() {
                     " }\n" +
                     "]")
         }
+        fun getHeatMapJSONArray(): JSONArray {
+            return JSONArray("[\n" +
+                    "  {\n" +
+                    "    \"S_no\": 1963,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/heatmap/heatmap_1%282019-10-09%2001%3A21%3A56%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=87w9StnxmNGxEYaZY7gozmRGhso%3D&Expires=1872951717\",\n" +
+                    "    \"RC_Mdate\": \"2019-10-09 01:21:56\"\n" +
+                    "  }\n" +
+                    "]")
+        }
+        fun getCropJSONArray(): JSONArray{
+            return JSONArray("[\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53560,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_0%282019-10-09%2001%3A18%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=eylDF3eEaEaayKOWSY8fpvDPMJs%3D&Expires=1872951527\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53561,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_1%282019-10-09%2001%3A18%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=tbdFWXMfVirPXu%2BW2PCJ9aMEOOk%3D&Expires=1872951528\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53562,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_2%282019-10-09%2001%3A18%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=CxgMHr292w7uOF1DBu1KxsJrhk8%3D&Expires=1872951529\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53563,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_3%282019-10-09%2001%3A18%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=AygoAE%2BPSX%2B6YB6JKQdrQm3Yeqo%3D&Expires=1872951531\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53564,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_4%282019-10-09%2001%3A18%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=2mN07CYPOe8kmWVFTC3sFfQRHn8%3D&Expires=1872951531\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53565,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_5%282019-10-09%2001%3A18%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=TAra885Sxds0AOGClMANDigIzO4%3D&Expires=1872951532\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53566,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_6%282019-10-09%2001%3A18%3A52%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=wrghOFBwEZWvtyWIcR85bGggbWA%3D&Expires=1872951534\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:52\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53567,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_7%282019-10-09%2001%3A18%3A52%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=pIVgb3EIvgPBQvDeeFklDTNZtZc%3D&Expires=1872951534\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:52\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53568,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_8%282019-10-09%2001%3A18%3A52%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=jIsoDAD7ShBh%2Fqg%2FT%2Bv31RFGTWo%3D&Expires=1872951535\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:52\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53569,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_9%282019-10-09%2001%3A18%3A55%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=ixUxz%2BPJOV8%2BuysNT2VmotNZUu4%3D&Expires=1872951537\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:55\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53570,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_10%282019-10-09%2001%3A18%3A55%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=9bdw1ThzqZ5UEFVgQzBepbTQMzU%3D&Expires=1872951538\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:55\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53571,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_11%282019-10-09%2001%3A18%3A55%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=5xkPSfus4jALUcMVqLhwordrEJk%3D&Expires=1872951539\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:55\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53572,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_12%282019-10-09%2001%3A18%3A59%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=yLcoh31sPLVALy7vuXOj%2Bah0lWM%3D&Expires=1872951541\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:59\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53573,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_13%282019-10-09%2001%3A18%3A59%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=zNEJVlmUNJ6zYnn1XaUgechP2Hc%3D&Expires=1872951541\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:59\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53574,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_14%282019-10-09%2001%3A18%3A59%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=jPzP7NTAd2dsvAwMD16fPLP3vkc%3D&Expires=1872951542\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:18:59\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53575,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_15%282019-10-09%2001%3A19%3A02%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=UT1QvQCWYB6duvoKassuG9yEwBU%3D&Expires=1872951544\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:02\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53576,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_16%282019-10-09%2001%3A19%3A02%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=6tM8VgTwZDX9k86LCX6PJz0%2BvNc%3D&Expires=1872951545\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:02\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53577,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_17%282019-10-09%2001%3A19%3A02%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=y8oHDBE5HRpVda9nfiNHTOHKBJo%3D&Expires=1872951545\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:02\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53578,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_18%282019-10-09%2001%3A19%3A05%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=2S7ZI7MB4hspVgmuCthSvew1pj8%3D&Expires=1872951547\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:05\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53579,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_19%282019-10-09%2001%3A19%3A05%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=SP5QzP22x7xPNiP6auLxxU%2BXGFE%3D&Expires=1872951548\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:05\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53580,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_20%282019-10-09%2001%3A19%3A05%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=XGrCjWL8cr6O%2FGpjq1W2M3WIXI0%3D&Expires=1872951548\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:05\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53581,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_21%282019-10-09%2001%3A19%3A08%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=hwRJrGZHB8NTBr8Pj67O6d08aOY%3D&Expires=1872951551\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:08\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53582,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_22%282019-10-09%2001%3A19%3A08%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=x4yy8hX%2FgQW0r33oKv4808DqdNk%3D&Expires=1872951551\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:08\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53583,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_23%282019-10-09%2001%3A19%3A08%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=t3WVCP90X%2FiisY7sruARpZs5wj8%3D&Expires=1872951552\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:08\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53584,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_24%282019-10-09%2001%3A19%3A12%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=1bQ9oErojsG3tHn6ucSIEMB%2BJIk%3D&Expires=1872951554\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:12\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53585,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_25%282019-10-09%2001%3A19%3A12%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=OF8dJbbqD%2BJGlHfCLeJWo%2BUGHnU%3D&Expires=1872951554\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:12\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53586,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_26%282019-10-09%2001%3A19%3A12%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=MAZsvA%2By%2FGnrwGf8UHAod%2F%2BlhOA%3D&Expires=1872951555\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:12\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53587,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_27%282019-10-09%2001%3A19%3A15%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=mjUKZgdAwDpc%2BJa1%2Bv5BTrAH25w%3D&Expires=1872951557\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:15\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53588,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_28%282019-10-09%2001%3A19%3A15%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=YX9DgHAMOt54vHGpqUUxIugRbAM%3D&Expires=1872951558\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:15\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53589,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_29%282019-10-09%2001%3A19%3A15%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=cnhAhwu1JWc57kXyvZ3QCnZwiAw%3D&Expires=1872951558\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:15\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53590,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_30%282019-10-09%2001%3A19%3A18%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=LSLgAiOYaIEqSAOz4UDMJ61ug4I%3D&Expires=1872951560\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:18\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53591,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_31%282019-10-09%2001%3A19%3A18%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=qHs6TqavtPBtA%2BwhK7Vwpko0%2BsE%3D&Expires=1872951561\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:18\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53592,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_32%282019-10-09%2001%3A19%3A18%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=tR74g93cp4qNDze%2BBCUg%2Fe3Hx%2Fw%3D&Expires=1872951561\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:18\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53593,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_33%282019-10-09%2001%3A19%3A18%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=CiW2LnHI%2FkDL%2FEOtIokXbZKCsFQ%3D&Expires=1872951562\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:18\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53594,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_34%282019-10-09%2001%3A19%3A22%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=%2FHPNhQ1s1KuCYEQncq9rWsnMzeA%3D&Expires=1872951564\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:22\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53595,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_35%282019-10-09%2001%3A19%3A22%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=nifxEiHUs8VV3FsMfHAlRpvu4ck%3D&Expires=1872951564\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:22\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53596,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_36%282019-10-09%2001%3A19%3A22%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=EMNnWuq%2FPps2hJPE%2BCiGAXTmX98%3D&Expires=1872951565\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:22\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53597,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_37%282019-10-09%2001%3A19%3A22%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=jfv5MfSzkObW2r4YoBft2%2FDrllo%3D&Expires=1872951565\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:22\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53598,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_38%282019-10-09%2001%3A19%3A25%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=u1nH7fTPKeN%2BuAxPM4j7vWRzrcE%3D&Expires=1872951567\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:25\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53599,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_39%282019-10-09%2001%3A19%3A25%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=D6Ju7QW1pAtaxYr0caibEI6QJCc%3D&Expires=1872951568\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:25\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53600,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_40%282019-10-09%2001%3A19%3A25%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=LTTQIOS4JHhT3oRNK4ygABfME88%3D&Expires=1872951568\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:25\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53601,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_41%282019-10-09%2001%3A19%3A25%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=vvROsODIyeiVUv8jUmG%2BEJlI5P0%3D&Expires=1872951569\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:25\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53602,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_42%282019-10-09%2001%3A19%3A29%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=mc%2FHdOPYHP4HAabirLDnlLLW2hE%3D&Expires=1872951571\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:29\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53603,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_43%282019-10-09%2001%3A19%3A29%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=zi9bVvgXDZ8A212FW2QCqn5pDAA%3D&Expires=1872951572\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:29\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53604,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_44%282019-10-09%2001%3A19%3A29%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=TOulHCPBLdBIbd5GO7hozg%2F7%2Fo4%3D&Expires=1872951572\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:29\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53605,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_45%282019-10-09%2001%3A19%3A29%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=sK73CdfOnbai0%2FoGz2QAGuy7p44%3D&Expires=1872951573\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:29\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53606,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_46%282019-10-09%2001%3A19%3A33%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=A9qpBdGHUtqQGF9zx%2Bdg0wv%2BC7o%3D&Expires=1872951575\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:33\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53607,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_47%282019-10-09%2001%3A19%3A33%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=LgxkA9xaRDfAbKQUvyJ8rWfs0Po%3D&Expires=1872951575\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:33\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53608,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_48%282019-10-09%2001%3A19%3A33%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=oAbDNjyVsh%2FjfmDKXJMY2KTJvJQ%3D&Expires=1872951576\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:33\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53609,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_49%282019-10-09%2001%3A19%3A33%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=jv1VgVy%2Bj3H5XaWDwYLxxzV9lwc%3D&Expires=1872951576\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:33\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53610,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_50%282019-10-09%2001%3A19%3A36%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=1xSwJEmTMq%2FEUv2yXGgjiWCR1qw%3D&Expires=1872951579\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:36\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53611,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_51%282019-10-09%2001%3A19%3A36%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=i3It%2BZROB%2BCE5cL1X0QrVQsNhc8%3D&Expires=1872951579\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:36\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53612,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_52%282019-10-09%2001%3A19%3A36%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=s0E%2FQI82ROvH08wsy011ADmck%2Fc%3D&Expires=1872951579\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:36\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53613,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_53%282019-10-09%2001%3A19%3A36%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=yGJMAYbkagqZ8BnIDjSdYFckCNs%3D&Expires=1872951580\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:36\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53614,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_54%282019-10-09%2001%3A19%3A40%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=YWvJbhc7kb4InMF5BBqNFQG3UQo%3D&Expires=1872951582\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:40\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53615,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_55%282019-10-09%2001%3A19%3A40%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=sliWzC7JDn2mkovxsGiVUYZHJpg%3D&Expires=1872951583\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:40\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53616,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_56%282019-10-09%2001%3A19%3A40%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=%2B41xJxi2%2BM2CiWb7%2FCf0nxb9%2FEw%3D&Expires=1872951583\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:40\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53617,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_57%282019-10-09%2001%3A19%3A40%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=kOuhyqQLWb6DwdgDJlv6YyweAsE%3D&Expires=1872951584\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:40\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53618,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_58%282019-10-09%2001%3A19%3A40%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=4%2BLB9UNkjEfT2U1fPJ084EUhADQ%3D&Expires=1872951584\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:40\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53619,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_59%282019-10-09%2001%3A19%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=tjqB67eTkVkajsvwCoTbLGk4kzY%3D&Expires=1872951586\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53620,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_60%282019-10-09%2001%3A19%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=zqmGknPwv1MoB2u1r7h3BFMehkk%3D&Expires=1872951587\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53621,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_61%282019-10-09%2001%3A19%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=P1XGr4TdXfkc31EJZp2E7vhGowc%3D&Expires=1872951587\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53622,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_62%282019-10-09%2001%3A19%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=2k5ZDKDWaVnJWcsfKFFu1wr1QOA%3D&Expires=1872951588\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53623,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_63%282019-10-09%2001%3A19%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=YgQHaoho5hj2r8eDXpY1N5o7HYw%3D&Expires=1872951589\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:44\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53624,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_64%282019-10-09%2001%3A19%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=5AxMKvalYk2JNM8SXrS2pcwwYAE%3D&Expires=1872951591\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53625,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_65%282019-10-09%2001%3A19%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=gOUUQYFSkwpT6kSW5Okk4uEgm3k%3D&Expires=1872951591\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53626,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_66%282019-10-09%2001%3A19%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=36arlI88WLEohoqrda7ww%2FYEXxs%3D&Expires=1872951592\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53627,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_67%282019-10-09%2001%3A19%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=jxIUvcZNnUQnw1Ur85JcsoobF00%3D&Expires=1872951592\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53628,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_68%282019-10-09%2001%3A19%3A49%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=ISjNqN7S%2FdOp0Lmt3mceBLr%2BYqg%3D&Expires=1872951593\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:49\"\n" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"S_no\": 53629,\n" +
+                    "    \"RC_NO\": 1,\n" +
+                    "    \"RC_url\": \"https://smartcctvsystems.s3.amazonaws.com/vtest.avi/detected/detected_69%282019-10-09%2001%3A19%3A53%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=IPmlLFUb3OsmeSL5wxZOidEw9fc%3D&Expires=1872951595\",\n" +
+                    "    \"RC_Cdate\": \"2019-10-09 01:19:53\"\n" +
+                    "  }]")
+        }
     }
 
-    fun clearApplicationData(context: Context) {
+    private fun clearApplicationData(context: Context) {
         val cache = context.cacheDir
         val appDir = File(cache.parent)
         if (appDir.exists()) {

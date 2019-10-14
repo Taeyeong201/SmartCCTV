@@ -11,9 +11,13 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * not using
+ * ex. LoadImage(url, progressDialog, imageView)
+ */
 class LoadImage
 (private val imgPath: String, private val progressDialog: AlertDialog, private val imageView : ImageView)
-    // 이 코드는 메모리릭이 생길 수 있는 코딩
+    // 이 코드는 메모리누수이 생길 수 있는 코딩
     // https://dwenn.tistory.com/48 해결방안
     : AsyncTask<Void, Void, Bitmap>() {
 

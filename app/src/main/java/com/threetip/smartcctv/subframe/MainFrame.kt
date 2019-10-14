@@ -1,23 +1,21 @@
 package com.threetip.smartcctv.subframe
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.GridView
 import android.widget.ImageView
+import com.threetip.smartcctv.DetectingView
 import com.threetip.smartcctv.R
 import com.threetip.smartcctv.adapter.DetectGridAdapter
-import com.threetip.smartcctv.controller.LoadImage
 
-@SuppressLint("ValidFragment")
-class MainFrame
-constructor(private val progressDialog : AlertDialog): Fragment() {
-    var _context : Context? = null
+class MainFrame : Fragment() {
+    private var _context: Context? = null
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         this._context = context
@@ -28,10 +26,17 @@ constructor(private val progressDialog : AlertDialog): Fragment() {
         val ivFrame = rootView.findViewById<ImageView>(R.id.iv_frame)
         val gvList = rootView.findViewById<GridView>(R.id.gv_image_list)
         gvList.adapter = DetectGridAdapter(context!!)
-//        val databaseImage = LoadImage("https://smartcctvsystems.s3.amazonaws.com/vtest.avi/frame/frame_0%282019-10-09%2001%3A18%3A44%29.jpg?AWSAccessKeyId=AKIAJRMH7FS7TDMNHKHA&Signature=Kzl54xuulix5v1mUrkxYKn27%2BpY%3D&Expires=1872951527",
-//                progressDialog, ivFrame)
+
+        gvList.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            ivFrame.setImageBitmap(BitmapFactory.decodeFile(DetectingView.detectMainImages[position].filePath))
+        }
+
+        if (DetectingView.detectMainImages.size != 0)
+            ivFrame.setImageBitmap(BitmapFactory.decodeFile(DetectingView.detectMainImages[0].filePath))
+//        val databaseImage = LoadImage(url,progressDialog, imageView)
 //        databaseImage.execute()
 
         return rootView
     }
+
 }

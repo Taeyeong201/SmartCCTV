@@ -9,17 +9,15 @@ import android.util.Log
 import com.threetip.smartcctv.DetectingView
 import com.threetip.smartcctv.dto.DetectImage
 import com.threetip.smartcctv.dto.HandleValue
-import org.json.JSONArray
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
-import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.URL
 
-class ReadDetectImage constructor(val url: String, val context: Context, private val progressDialog: AlertDialog) : AsyncTask<Void, Void, Void>() {
+class ReadDetectImage constructor(val url: String, val context: Context, private val progressDialog: AlertDialog, private val what:Int) : AsyncTask<Void, Int, Void>() {
     private val requestHttpURLConnection
             by lazy { RequestHttpURLConnection() }
+
 
     override fun onPreExecute() {
         super.onPreExecute()
@@ -27,34 +25,96 @@ class ReadDetectImage constructor(val url: String, val context: Context, private
     }
 
     override fun doInBackground(vararg params: Void?): Void? {
-        val jsonData = DetectingView.getTestJSONArray()
+        when(what) {
+            HandleValue.DETECT_MAIN_FRAME.ordinal-> {
+                val jsonData = DetectingView.getMainJSONArray()
 //        val jsonData = JSONArray(requestHttpURLConnection.request(url))
-        Log.d("DetectingVIew", jsonData.toString())
-        for (i in 0 until jsonData.length()) {
-            val obj = jsonData.getJSONObject(i)
-            val sNo = obj.getInt("S_no")
-            val rcNo = obj.getInt("RC_NO")
-            val rcCdate = obj.getString("RC_Cdate")
-            val rcUrl = obj.getString("RC_url")
-            val fileName = "${sNo}_$rcCdate.jpg"
+                Log.d("DetectingVIew", jsonData.toString())
+                for (i in 0 until jsonData.length()) {
+                    val obj = jsonData.getJSONObject(i)
+                    val sNo = obj.getInt("S_no")
+                    val rcCdate = obj.getString("RC_Cdate")
+                    val rcUrl = obj.getString("RC_url")
+                    val fileName = "${sNo}_$rcCdate.jpg"
 
-            val cacheDir = context.cacheDir
-            val cacheFile = File(cacheDir.absolutePath, fileName)
-            if (!cacheFile.exists()) {
-                val fos = FileOutputStream(cacheFile.absolutePath)
-                Log.d("ReadDetectImage", cacheFile.absolutePath)
-                val url = URL(rcUrl)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.doInput = true
-                conn.connect()
-                val inputStream = conn.inputStream
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-                fos.close()
+                    val cacheDir = context.cacheDir
+                    val cacheFile = File(cacheDir.absolutePath, fileName)
+                    if (!cacheFile.exists()) {
+                        val fos = FileOutputStream(cacheFile.absolutePath)
+                        Log.d("ReadDetectImage", cacheFile.absolutePath)
+                        val url = URL(rcUrl)
+                        val conn = url.openConnection() as HttpURLConnection
+                        conn.doInput = true
+                        conn.connect()
+                        val inputStream = conn.inputStream
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                        fos.close()
+                    }
+                    DetectingView.detectMainImages.add(
+                            DetectImage(sNo, rcCdate, rcUrl, cacheFile.absolutePath))
+                }
             }
-            DetectingView.detectImages.add(
-                    DetectImage(sNo, rcNo, rcCdate, rcUrl, cacheFile.absolutePath))
+            HandleValue.DETECT_HEATMAP_FRAME.ordinal-> {
+                val jsonData = DetectingView.getHeatMapJSONArray()
+//        val jsonData = JSONArray(requestHttpURLConnection.request(url))
+                Log.d("DetectingVIew", jsonData.toString())
+                for (i in 0 until jsonData.length()) {
+                    val obj = jsonData.getJSONObject(i)
+                    val sNo = obj.getInt("S_no")
+                    val rcCdate = obj.getString("RC_Mdate")
+                    val rcUrl = obj.getString("RC_url")
+                    val fileName = "${sNo}_$rcCdate.jpg"
+
+                    val cacheDir = context.cacheDir
+                    val cacheFile = File(cacheDir.absolutePath, fileName)
+                    if (!cacheFile.exists()) {
+                        val fos = FileOutputStream(cacheFile.absolutePath)
+                        Log.d("ReadDetectImage", cacheFile.absolutePath)
+                        val url = URL(rcUrl)
+                        val conn = url.openConnection() as HttpURLConnection
+                        conn.doInput = true
+                        conn.connect()
+                        val inputStream = conn.inputStream
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                        fos.close()
+                    }
+                    DetectingView.detectHeatMapImages.add(
+                            DetectImage(sNo, rcCdate, rcUrl, cacheFile.absolutePath))
+                }
+            }
+            HandleValue.DETECT_CROP_FRAME.ordinal-> {
+                val jsonData = DetectingView.getCropJSONArray()
+//        val jsonData = JSONArray(requestHttpURLConnection.request(url))
+                Log.d("DetectingVIew", jsonData.toString())
+                for (i in 0 until jsonData.length()) {
+                    val obj = jsonData.getJSONObject(i)
+                    val sNo = obj.getInt("S_no")
+                    val rcCdate = obj.getString("RC_Cdate")
+                    val rcUrl = obj.getString("RC_url")
+                    val fileName = "${sNo}_$rcCdate.jpg"
+
+                    val cacheDir = context.cacheDir
+                    val cacheFile = File(cacheDir.absolutePath, fileName)
+                    if (!cacheFile.exists()) {
+                        val fos = FileOutputStream(cacheFile.absolutePath)
+                        Log.d("ReadDetectImage", cacheFile.absolutePath)
+                        val url = URL(rcUrl)
+                        val conn = url.openConnection() as HttpURLConnection
+                        conn.doInput = true
+                        conn.connect()
+                        val inputStream = conn.inputStream
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                        fos.close()
+                    }
+                    DetectingView.detectCropImages.add(
+                            DetectImage(sNo, rcCdate, rcUrl, cacheFile.absolutePath))
+                }
+            }
         }
+
         return null
     }
 

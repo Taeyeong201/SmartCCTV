@@ -1,27 +1,20 @@
 package com.threetip.smartcctv.adapter
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
-import com.threetip.smartcctv.DetectingView.Companion.detectImages
-import com.threetip.smartcctv.R
-import com.threetip.smartcctv.dto.DetectImage
+import com.threetip.smartcctv.DetectingView.Companion.detectMainImages
 import com.threetip.smartcctv.subframe.grid.DetectGridFrame
-import kotlinx.android.synthetic.main.detect_grid_item.*
 
 class DetectGridAdapter(val context: Context) : BaseAdapter() {
 
     override fun getCount(): Int {
-        return detectImages.size
+        return detectMainImages.size
     }
 
     override fun getItem(position: Int): Any? {
-        return detectImages[position]
+        return detectMainImages[position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -30,7 +23,7 @@ class DetectGridAdapter(val context: Context) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
         val view = DetectGridFrame(context)
-        val item = detectImages[position]
+        val item = detectMainImages[position]
 
         view.setIv_thumbnail(item.filePath)
         view.setTv_RcDate(item.rC_Cdate)
