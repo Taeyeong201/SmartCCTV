@@ -1,25 +1,21 @@
 package com.threetip.smartcctv
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.threetip.smartcctv.adapter.DetectGridAdapter
+import android.widget.Toast
 import com.threetip.smartcctv.controller.ProgressBarMaker
 import com.threetip.smartcctv.subframe.DetectedFrame
 import com.threetip.smartcctv.adapter.FlagPageAdapter
 import com.threetip.smartcctv.controller.DetectViewHandler
-import com.threetip.smartcctv.controller.ReadDetectImage
+import com.threetip.smartcctv.controller.session.ReadDetectImage
 import com.threetip.smartcctv.controller.litener.DetectViewListener
 import com.threetip.smartcctv.dto.DetectImage
-import com.threetip.smartcctv.dto.HandleValue
 import com.threetip.smartcctv.subframe.HeatMapFrame
 import com.threetip.smartcctv.subframe.MainFrame
 import kotlinx.android.synthetic.main.detect_activity.*
-import kotlinx.android.synthetic.main.detect_main_frame.*
 import org.json.JSONArray
 import java.io.File
 
@@ -37,22 +33,24 @@ class DetectingView : AppCompatActivity() {
 
         val progressBarMaker = ProgressBarMaker(this, "Loading")
         val progressDialog = progressBarMaker.getProgressDialog()
-
+        val context = this
         detectHandler = DetectViewHandler(object : DetectViewListener {
+            override fun error(msg: String?) {
+                Toast.makeText(context, "Error : $msg", Toast.LENGTH_LONG).show()
+            }
+
             override fun loadingFinish() {
-
-
                 pagerAdapter.notifyDataSetChanged()
             }
         })
 
+        val urlList: ArrayList<String> = ArrayList()
+        urlList.add("http://192.168.0.24:8080/controller/android/getListCaptureable")
+        urlList.add("http://192.168.0.24:8080/controller/android/getListHeatmap")
+        urlList.add("http://192.168.0.24:8080/controller/android/getListCrop")
         // (Data 받을 URL, context, progressBar)
-        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
-                this, progressDialog, HandleValue.DETECT_MAIN_FRAME.ordinal).execute()
-        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
-                this, progressDialog, HandleValue.DETECT_CROP_FRAME.ordinal).execute()
-        ReadDetectImage("http://192.168.0.24:8080/controller/android/getListMap",
-                this, progressDialog, HandleValue.DETECT_HEATMAP_FRAME.ordinal).execute()
+        ReadDetectImage(urlList, this, progressDialog).execute()
+
 
 
         //어뎁터에 Fragment 추가
@@ -79,7 +77,7 @@ class DetectingView : AppCompatActivity() {
         val detectMainImages = ArrayList<DetectImage>()
         val detectHeatMapImages = ArrayList<DetectImage>()
         val detectCropImages = ArrayList<DetectImage>()
-        lateinit var detectHandler:DetectViewHandler
+        lateinit var detectHandler: DetectViewHandler
         fun getMainJSONArray(): JSONArray {
             return JSONArray("[\n" +
                     " {\n" +
@@ -432,6 +430,7 @@ class DetectingView : AppCompatActivity() {
                     " }\n" +
                     "]")
         }
+
         fun getHeatMapJSONArray(): JSONArray {
             return JSONArray("[\n" +
                     "  {\n" +
@@ -442,7 +441,8 @@ class DetectingView : AppCompatActivity() {
                     "  }\n" +
                     "]")
         }
-        fun getCropJSONArray(): JSONArray{
+
+        fun getCropJSONArray(): JSONArray {
             return JSONArray("[\n" +
                     "  {\n" +
                     "    \"S_no\": 53560,\n" +
@@ -874,7 +874,7 @@ class DetectingView : AppCompatActivity() {
             val children = appDir.list()
             for (s in children) {
                 //다운로드 파일은 지우지 않도록 설정
-                if(s == "lib" || s == "files") continue;
+                if (s == "lib" || s == "files") continue;
                 deleteDir(File(appDir, s))
                 Log.d("test", "File /data/data/" + context.packageName + "/" + s + " DELETED")
             }

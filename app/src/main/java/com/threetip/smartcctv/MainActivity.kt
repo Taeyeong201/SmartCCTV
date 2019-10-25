@@ -5,8 +5,12 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
 import android.support.v7.app.AlertDialog
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.threetip.smartcctv.controller.session.RequestHttpURLConnection
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,7 +30,19 @@ class MainActivity : AppCompatActivity() {
 
             when {
                 text.isEmpty() -> Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show()
-                "user1" == text -> loginIntent()
+                "user1" == text -> {
+                    Thread {
+                        val cameraData = RequestHttpURLConnection().request("http://192.168.0.24:8080/controller/android/getListCctvIP")
+                                ?: "no data"
+                        if (cameraData == "no data") {
+                            Toast.makeText(this, "Camera 정보 없음", Toast.LENGTH_LONG).show()
+                        } else {
+                            CameraIP = JSONArray(cameraData).getJSONObject(0).getString("r_ip")
+                            Log.d("Main", "ReadCameraIP : $CameraIP")
+                            loginIntent()
+                        }
+                    }.start()
+                }
                 "user2" == text -> loginIntent()
                 else -> AlertDialog.Builder(this)
                         .setTitle("로그인 실패")
@@ -52,9 +68,14 @@ class MainActivity : AppCompatActivity() {
         startActivity(signUpIntent)
         finish()
     }
+
     private fun loginIntent() {
         val mainMenuIntent = Intent(this, MainMenu::class.java)
         startActivity(mainMenuIntent)
         finish()
+    }
+
+    companion object {
+        lateinit var CameraIP: String
     }
 }

@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.menu_view.*
 import android.support.v7.app.AlertDialog
+import com.threetip.smartcctv.controller.ProgressBarMaker
+import com.threetip.smartcctv.controller.session.CameraControler
+import com.threetip.smartcctv.dto.PTZValue
 
 
 class MainMenu : AppCompatActivity() {
@@ -29,6 +32,10 @@ class MainMenu : AppCompatActivity() {
             val detectViewIntent = Intent(this, DetectingView::class.java)
             startActivity(detectViewIntent)
         }
+
+        val progressBar = ProgressBarMaker(this, "Loading").getProgressDialog()
+        cameraControl = CameraControler("192.168.0.201", progressBar)
+        cameraControl.execute()
     }
 
     private fun liveStreamIntent() {
@@ -39,7 +46,7 @@ class MainMenu : AppCompatActivity() {
     private fun securityMessage() {
         if (cb_security.isChecked) {
             Toast.makeText(this, "침입 감지 모드 실행 중", Toast.LENGTH_SHORT).show()
-
+            cameraControl.sendPTZValue(PTZValue.Run)
         } else {
             val alertDialogBuilder = AlertDialog.Builder(this)
 
@@ -53,6 +60,7 @@ class MainMenu : AppCompatActivity() {
                     .setPositiveButton("종료"
                     ) { dialog, id ->
                         // 프로그램을 종료한다
+                        cameraControl.sendPTZValue(PTZValue.Stop)
                         Toast.makeText(this, "침입 감지 모드 종료", Toast.LENGTH_SHORT).show()
                     }
                     .setNegativeButton("취소"
@@ -67,5 +75,9 @@ class MainMenu : AppCompatActivity() {
             alertDialog.show()
 
         }
+    }
+
+    companion object {
+        lateinit var cameraControl:CameraControler
     }
 }
