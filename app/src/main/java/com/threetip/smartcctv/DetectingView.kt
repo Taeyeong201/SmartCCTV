@@ -45,9 +45,9 @@ class DetectingView : AppCompatActivity() {
         })
 
         val urlList: ArrayList<String> = ArrayList()
-        urlList.add("http://192.168.0.24:8080/controller/android/getListCaptureable")
-        urlList.add("http://192.168.0.24:8080/controller/android/getListHeatmap")
-        urlList.add("http://192.168.0.24:8080/controller/android/getListCrop")
+        urlList.add("http://220.79.168.176:8082/controller/android/getListCaptureable")
+        urlList.add("http://220.79.168.176:8082/controller/android/getListHeatmap")
+        urlList.add("http://220.79.168.176:8082/controller/android/getListCrop")
         // (Data 받을 URL, context, progressBar)
         ReadDetectImage(urlList, this, progressDialog).execute()
 

@@ -21,7 +21,7 @@ class CameraControler(private val cameraIP:String, private val progressDialog: A
     lateinit var inputStream : InputStream
     lateinit var outputStream : OutputStream
 
-    private val buf = ByteArray(32)
+    private val buf = ByteArray(1)
 
     private fun connect() {
         sock.connect(socketAddress)

@@ -3,6 +3,7 @@ package com.threetip.smartcctv
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import kotlinx.android.synthetic.main.activity_main.*
 import android.support.v7.app.AlertDialog
 import android.util.Log
@@ -14,6 +15,10 @@ import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        lateinit var CameraIP: String
+        var isCamera:Boolean = true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,17 +36,20 @@ class MainActivity : AppCompatActivity() {
             when {
                 text.isEmpty() -> Toast.makeText(this, "아이디를 입력하세요", Toast.LENGTH_SHORT).show()
                 "user1" == text -> {
-                    Thread {
-                        val cameraData = RequestHttpURLConnection().request("http://192.168.0.24:8080/controller/android/getListCctvIP")
-                                ?: "no data"
-                        if (cameraData == "no data") {
-                            Toast.makeText(this, "Camera 정보 없음", Toast.LENGTH_LONG).show()
-                        } else {
-                            CameraIP = JSONArray(cameraData).getJSONObject(0).getString("r_ip")
-                            Log.d("Main", "ReadCameraIP : $CameraIP")
-                            loginIntent()
-                        }
-                    }.start()
+                    if(isCamera) {
+                        Thread {
+                            val cameraData = RequestHttpURLConnection().request("http://220.79.168.176:8082/controller/android/getListCctvIP")
+                                    ?: "no data"
+                            if (cameraData == "no data") {
+//                            Toast.makeText(this, "Camera 정보 없음", Toast.LENGTH_LONG).show()
+                                Log.e("Main", "No data")
+                            } else {
+                                CameraIP = JSONArray(cameraData).getJSONObject(0).getString("r_ip")
+                                Log.d("Main", "ReadCameraIP : $CameraIP")
+                                loginIntent()
+                            }
+                        }.start()
+                    }
                 }
                 "user2" == text -> loginIntent()
                 else -> AlertDialog.Builder(this)
@@ -49,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                         .setMessage("없는 아이디 입니다.")
                         .setNeutralButton("닫기"
 
-                        ) { dlg, sumthin ->
+                        ) { _, _ ->
 
                         }.show()
             }
@@ -61,6 +69,7 @@ class MainActivity : AppCompatActivity() {
 //        } else {
 //            // 권한 있음
 //        }
+
     }
 
     private fun signUpIntent() {
@@ -73,9 +82,5 @@ class MainActivity : AppCompatActivity() {
         val mainMenuIntent = Intent(this, MainMenu::class.java)
         startActivity(mainMenuIntent)
         finish()
-    }
-
-    companion object {
-        lateinit var CameraIP: String
     }
 }

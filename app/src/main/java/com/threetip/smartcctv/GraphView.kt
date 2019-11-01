@@ -23,17 +23,17 @@ class GraphView : AppCompatActivity(){
         wsSetting.setSupportZoom(true)
         wsSetting.cacheMode = WebSettings.LOAD_NO_CACHE
 
-        wv_live.loadUrl("http://221.155.250.34:8082/controller/Customer/chartand?data=month")
+        wv_live.loadUrl("http://220.79.168.176:8082/controller/Customer/chartand?data=month")
 
 
 
         btn_graph_day.setOnClickListener {
             what = if(what) {
-                wv_live.loadUrl("http://221.155.250.34:8082/controller/Customer/chartand?data=day")
+                wv_live.loadUrl("http://220.79.168.176:8082/controller/Customer/chartand?data=day")
                 btn_graph_day.text = "month"
                 false
             } else {
-                wv_live.loadUrl("http://221.155.250.34:8082/controller/Customer/chartand?data=month")
+                wv_live.loadUrl("http://220.79.168.176:8082/controller/Customer/chartand?data=month")
                 btn_graph_day.text = "day"
                 true
             }

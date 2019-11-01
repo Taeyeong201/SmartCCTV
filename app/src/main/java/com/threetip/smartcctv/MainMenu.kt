@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.menu_view.*
 import android.support.v7.app.AlertDialog
+import com.threetip.smartcctv.MainActivity.Companion.CameraIP
+import com.threetip.smartcctv.MainActivity.Companion.isCamera
 import com.threetip.smartcctv.controller.ProgressBarMaker
 import com.threetip.smartcctv.controller.session.CameraControler
 import com.threetip.smartcctv.dto.PTZValue
@@ -34,8 +36,10 @@ class MainMenu : AppCompatActivity() {
         }
 
         val progressBar = ProgressBarMaker(this, "Loading").getProgressDialog()
-        cameraControl = CameraControler("192.168.0.201", progressBar)
-        cameraControl.execute()
+        if(isCamera) {
+            cameraControl = CameraControler(CameraIP, progressBar)
+            cameraControl.execute()
+        }
     }
 
     private fun liveStreamIntent() {
@@ -46,7 +50,9 @@ class MainMenu : AppCompatActivity() {
     private fun securityMessage() {
         if (cb_security.isChecked) {
             Toast.makeText(this, "침입 감지 모드 실행 중", Toast.LENGTH_SHORT).show()
-            cameraControl.sendPTZValue(PTZValue.Run)
+            if(isCamera) {
+                cameraControl.sendPTZValue(PTZValue.Run)
+            }
         } else {
             val alertDialogBuilder = AlertDialog.Builder(this)
 
@@ -58,13 +64,15 @@ class MainMenu : AppCompatActivity() {
                     .setMessage("침입 감지를 종료할 것입니까?")
                     .setCancelable(false)
                     .setPositiveButton("종료"
-                    ) { dialog, id ->
+                    ) { _, _ ->
                         // 프로그램을 종료한다
-                        cameraControl.sendPTZValue(PTZValue.Stop)
+                        if(isCamera) {
+                            cameraControl.sendPTZValue(PTZValue.Stop)
+                        }
                         Toast.makeText(this, "침입 감지 모드 종료", Toast.LENGTH_SHORT).show()
                     }
                     .setNegativeButton("취소"
-                    ) { dialog, id ->
+                    ) { dialog, _ ->
                         // 다이얼로그를 취소한다
                         dialog.cancel()
                         cb_security.performClick()
